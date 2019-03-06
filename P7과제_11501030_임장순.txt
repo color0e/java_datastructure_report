@@ -1,0 +1,650 @@
+﻿자료구조 P7 과제 (1,2) 정보보호학과 11501030임장순
+
+1번 이진탐색트리의 기능익히기
+
+[소스코드]
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+	
+public class BSTtask {
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		BST t = new BST(500, "Apple");  
+
+		t.put(600, "Banana");
+		t.put(200, "Melon"); 
+		t.put(100, "Orange");
+		t.put(400, "Tangerine"); 
+		t.put(250, "Kiwi");
+		t.put(150, "Grape");
+		t.put(800, "Strawberry"); 
+		t.put(700, "Cherry"); 
+		t.put(50,  "Pear");
+		t.put(350, "Lemon");
+		t.put(10,  "Watermelon");
+
+		System.out.println("1. 초기 BST의 높이 = "+ t.height());
+		System.out.println("* 연결노드의 내용 [Key Value]");
+		t.inorder(t.root);
+		System.out.println();
+		System.out.println();
+		
+		t.put(550, "Apple");
+		t.put(400, "Blueberry");
+		t.put(50, "Lime");
+		t.put(900, "Mango");
+		t.put(350, "Persimmon");
+		t.put(650, "Pineapple");
+		System.out.println("2. 6개 노드추가후 BST의 높이 = "+ t.height());
+		System.out.println("* 연결노드의 내용 [Key Value]");
+		t.inorder(t.root);
+		//이미존재하는 키를 가진 노드를 추가하였으므로 Value만 갱신된것
+		System.out.println();
+		System.out.println();
+		System.out.println("3. 특정 키값을 갖는 노드를 검색하여 출력하기(100,400,750)");
+		System.out.println("* 노드의 내용 [Key Value]");
+		Integer targets[] = {100,400,750};
+		for(Integer target : targets) {
+			String result = t.get(target)!=null?"["+target+" "+t.get(target)+"] ":"["+target+"은 BST에 없음] ";
+			System.out.print(result);
+		}
+		System.out.println();
+		System.out.println();
+		System.out.println("4. 최소키값을  찾아 출력하고, 최소 키 노드를 삭제하고 남은 노드들의 키값을 중위순회하여 출력");
+		System.out.println("*최소키값 출력 및 삭제후 연결노드의 내용 [Key Value]");
+		System.out.println("최소 Key값:"+t.min()+", Value값:"+t.get(t.min()));
+		t.deleteMin();
+		t.inorder(t.root);
+		
+		
+		System.out.println();
+		System.out.println();
+		System.out.println("5. 최대키값을  찾아 출력하고, 최대 키 노드를 삭제하고 남은 노드들의 키값을 중위순회하여 출력");
+		System.out.println("*최대키값 출력 및 삭제후 연결노드의 내용 [Key Value]");
+		System.out.println("최대 Key값:"+t.max()+", Value값:"+t.get(t.max()));
+		t.deleteMax();
+		t.inorder(t.root);
+		
+		System.out.println();
+		System.out.println();
+		System.out.println("6. 특정키값 150과 650을 갖는 노드를 차례로 삭제후 BST높이와 남은 노드들의 키값을 전위순회하여 출력");
+		System.out.println("*150,650 삭제후 연결노드의 내용");
+		t.delete(150);
+		t.delete(650);
+		t.preorder(t.root);
+		System.out.println();
+		System.out.println("BST높이:"+t.height());
+		
+		System.out.println();
+		System.out.println();
+		System.out.println("7. 특정키값 400과 800을 갖는 노드를 차례로 삭제후 BST높이와 남은 노드들의 키값을 중위순회하여 출력");
+		System.out.println("*400,800 삭제후 연결노드의 내용");
+		t.delete(400);
+		t.delete(800);
+		t.inorder_key(t.root);
+		System.out.println();
+		System.out.println("BST높이:"+t.height());
+
+		System.out.println();
+		System.out.println();
+		System.out.println("8. 특정키값 200과 600을 갖는 노드를 차례로 삭제후 BST높이와 남은 노드들의 키값을 레벨순회하여 출력");
+		System.out.println("*200,600 삭제후 연결노드의 내용");
+		t.delete(200);
+		t.delete(600);
+		t.levelorder(t.root);
+		System.out.println();
+		System.out.println("BST높이:"+t.height());
+	
+		
+	}
+
+	public static class BST<Key extends Comparable<Key>, Value>{
+		public Node root;
+		
+		public class Node <Key extends Comparable<Key>, Value> {
+			private Key   id;
+			private Value name;
+			private Node  left, right;
+
+			public Node(Key newId, Value newName) { // 노드 생성자
+				id   = newId;
+				name = newName;
+				left = right = null;
+			}
+			// get과 set 메소드들
+			public Key getKey()  	{ return id; }
+			public Value getValue() { return name; }
+			public Node getLeft() 	{ return left; }
+			public Node getRight() 	{ return right;}
+			public void setKey(Key     newId)  	{ id    = newId; }
+			public void setValue(Value newName) { name  = newName; }
+			public void setLeft(Node   newLeft) { left  = newLeft; }
+			public void setRight(Node  newRight){ right = newRight;}
+		}
+		
+		public Node getRoot() { return root; }
+		public BST(Key newId, Value newName){  // BST 생성자 
+			root = new Node(newId, newName);
+		}
+		
+		public Value get(Key k) {return get(root, k);}
+		public Value get(Node n, Key k) {
+			if (n == null)  return null;   // k를 발견 못함
+			int t = n.getKey().compareTo(k);
+			if (t > 0)   	return get(n.getLeft(), k);  // if (k < 노드 n의 id) 왼쪽 서브 트리 탐색
+			else if (t < 0) return get(n.getRight(), k); // if (k > 노드 n의 id) 오른쪽서브 트리 탐색
+			else  			return (Value) n.getValue(); // k를 가진 노드 발견
+		}
+		
+		public void put(Key k, Value v) {root = put(root, k, v);}
+		public Node put(Node n, Key k, Value v){
+			if (n == null)  return new Node(k, v); 
+			int t = n.getKey().compareTo(k);
+			if (t > 0)  n.setLeft(put(n.getLeft(), k, v));       // if (k < 노드 n의 id)왼쪽 서브트리에 삽입
+			else if (t < 0) n.setRight(put(n.getRight(), k, v)); // if (k > 노드 n의 id)오른쪽 서브트리에 삽입
+			else n.setValue(v); // 노드 n의 name을v로 갱신
+			return n;
+		}
+		
+		public Key min() { 
+			if (root == null) return null;
+			return (Key) min(root).getKey();
+		}
+		private Node min(Node n) {
+			if (n.getLeft() == null)  return n;
+			return min(n.getLeft());
+		}
+		
+		public Key max() { 
+			if (root == null) return null;
+			return (Key) max(root).getKey();
+		}
+		private Node max(Node n) {
+			if (n.getRight() == null)  return n;
+			return max(n.getRight());
+		}
+		
+		public void deleteMin() {
+			if (root == null) System.out.println("empty 트리");
+			root = deleteMin(root);
+		}
+		public Node deleteMin(Node n) {
+			if (n.getLeft() == null) return n.getRight();  // if (n의 왼쪽 자식==null) n의 오른쪽 자식 리턴
+			n.setLeft(deleteMin(n.getLeft())); 	  // if (n의 왼쪽 자식≠null), n의 왼쪽 자식으로 재귀 호출
+			return n;
+		}
+		
+		public void deleteMax() {
+	        if (root == null)  System.out.println("empty 트리");
+	        root = deleteMax(root);}
+		
+	    	private Node deleteMax(Node n) {
+	        if (n.getRight() == null) return n.getLeft();
+	        n.setRight(deleteMax(n.getRight()));
+	        return n;
+	    }
+	    
+		public void delete(Key k) {root = delete(root, k);} 
+		public Node delete(Node n, Key k) {
+			if (n==null) return null;  
+			int t = n.getKey().compareTo(k);
+			if (t > 0)      n.setLeft(delete(n.getLeft(), k));   // if (k < 노드 n의 id) 왼쪽 자식으로 이동
+			else if (t < 0) n.setRight(delete(n.getRight(), k)); // if (k > 노드 n의 id) 오른쪽 자식으로 이동
+			else {  // 삭제할 노드 발견
+				if (n.getRight() == null) return n.getLeft();  // case 0, 1 
+				if (n.getLeft()  == null) return n.getRight(); // case 1
+				Node target = n;   // case 2 Line10-13  
+				n = min(target.getRight()); // 삭제할 노드 자리로 옮겨올 노드 찾아서 n이 가리키게 함
+				n.setRight( deleteMin(target.getRight()));
+				n.setLeft(target.getLeft());
+			}
+			return n;
+		} 
+	 
+	    public int height() {return height(root)+1;}
+	    private int height(Node n) {
+	        if (n == null) return -1;
+	        return 1 + Math.max(height(n.getLeft()), height(n.getRight()));
+	    }
+	    
+		public void print(Node root) {
+			System.out.printf("\ninorder:\n");
+			inorder(root);
+			System.out.printf("\npreorder:\n");
+			preorder(root);
+			System.out.printf("\nlevel order:\n");
+			levelorder(root);
+		}
+		public void inorder(Node n){       // 중위 순회
+			if (n != null) {
+				inorder(n.getLeft());   // n의 왼쪽 서브 트리를 순회하기 위해
+				System.out.print("["+n.getKey()+" "+n.getValue()+"] ");  // 노드 n 방문
+				inorder(n.getRight());  // n의 오른쪽 서브 트리를 순회하기 위해
+			}
+		}
+		
+		public void inorder_key(Node n){       // 중위 순회
+			if (n != null) {
+				inorder_key(n.getLeft());   // n의 왼쪽 서브 트리를 순회하기 위해
+				System.out.print(n.getKey()+" ");   // 노드 n 방문
+				inorder_key(n.getRight());  // n의 오른쪽 서브 트리를 순회하기 위해
+			}
+		}
+		public void levelorder(Node root) { // 레벨 순회
+			Queue<Node> q = new LinkedList<Node>(); // 큐 자료구조 이용
+			Node t;
+			q.add(root);  // 루트 노드 큐에 삽입
+			while (!q.isEmpty()) { 
+				t = q.remove();   //큐에서 가장 앞에 있는 노드 제거
+				System.out.print(t.getKey()+" "); // 제거된 노드 출력(방문)
+				if (t.getLeft() != null)      // 제거된 왼쪽 자식이 null이 아니면
+					q.add(t.getLeft());       // 큐에 왼쪽 자식 삽입
+				if (t.getRight() != null)     // 제거된 오른쪽 자식이 null이 아니면
+					q.add(t.getRight());      // 큐에  오른쪽 자식 삽입
+			} 
+		}
+		public void preorder(Node n) {     // 전위 순회
+			if (n != null) {
+				System.out.print(n.getKey()+" ");  // 노드 n 방문
+				preorder(n.getLeft());  // n의 왼쪽    서브 트리를 순회하기 위해
+				preorder(n.getRight()); // n의 오른쪽 서브 트리를 순회하기 위해
+			}
+		}
+	}
+
+}
+
+[콘솔창 결과]
+1. 초기 BST의 높이 = 5
+* 연결노드의 내용 [Key Value]
+[10 Watermelon] [50 Pear] [100 Orange] [150 Grape] [200 Melon] [250 Kiwi] [350 Lemon] [400 Tangerine] [500 Apple] [600 Banana] [700 Cherry] [800 Strawberry] 
+
+2. 6개 노드추가후 BST의 높이 = 5
+* 연결노드의 내용 [Key Value]
+[10 Watermelon] [50 Lime] [100 Orange] [150 Grape] [200 Melon] [250 Kiwi] [350 Persimmon] [400 Blueberry] [500 Apple] [550 Apple] [600 Banana] [650 Pineapple] [700 Cherry] [800 Strawberry] [900 Mango] 
+
+3. 특정 키값을 갖는 노드를 검색하여 출력하기(100,400,750)
+* 노드의 내용 [Key Value]
+[100 Orange] [400 Blueberry] [750은 BST에 없음] 
+
+4. 최소키값을  찾아 출력하고, 최소 키 노드를 삭제하고 남은 노드들의 키값을 중위순회하여 출력
+*최소키값 출력 및 삭제후 연결노드의 내용 [Key Value]
+최소 Key값:10, Value값:Watermelon
+[50 Lime] [100 Orange] [150 Grape] [200 Melon] [250 Kiwi] [350 Persimmon] [400 Blueberry] [500 Apple] [550 Apple] [600 Banana] [650 Pineapple] [700 Cherry] [800 Strawberry] [900 Mango] 
+
+5. 최대키값을  찾아 출력하고, 최대 키 노드를 삭제하고 남은 노드들의 키값을 중위순회하여 출력
+*최대키값 출력 및 삭제후 연결노드의 내용 [Key Value]
+최대 Key값:900, Value값:Mango
+[50 Lime] [100 Orange] [150 Grape] [200 Melon] [250 Kiwi] [350 Persimmon] [400 Blueberry] [500 Apple] [550 Apple] [600 Banana] [650 Pineapple] [700 Cherry] [800 Strawberry] 
+
+6. 특정키값 150과 650을 갖는 노드를 차례로 삭제후 BST높이와 남은 노드들의 키값을 전위순회하여 출력
+*150,650 삭제후 연결노드의 내용
+500 200 100 50 400 250 350 600 550 800 700 
+BST높이:5
+
+
+7. 특정키값 400과 800을 갖는 노드를 차례로 삭제후 BST높이와 남은 노드들의 키값을 중위순회하여 출력
+*400,800 삭제후 연결노드의 내용
+50 100 200 250 350 500 550 600 700 
+BST높이:4
+
+
+8. 특정키값 200과 600을 갖는 노드를 차례로 삭제후 BST높이와 남은 노드들의 키값을 레벨순회하여 출력
+*200,600 삭제후 연결노드의 내용
+500 250 700 100 350 550 50 
+BST높이:4
+
+===========================================================================
+
+2번 AVL탐색트리의 기능익히기 (회전연산의 검증을 위해서 요구사항 5,6,7을 일부수정하였습니다.)
+
+[소스코드]
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+public class AVLtask {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		AVL<Integer, String> st = new AVL<Integer, String>();
+
+	 	st.put(30, "Apple"); 
+	 	st.put(40, "Grape");
+	 	st.put(100, "Lime");
+	 	st.put(20, "Mango"); 
+	 	st.put(10, "Strawberry");
+	 	st.put(60, "Banana");
+	 	st.put(70, "Cherry");
+	 	System.out.println("1. 초기에 삽입한 노드로 구서오딘 트리의 노드들과 높이를 출력");
+	 	System.out.println("높이:"+st.getHeight());
+	 	st.levelorder(st.root);
+	 	System.out.println();
+	 	System.out.println();
+	 	
+	 	System.out.println("2. 1의 AVL트리에 추가하여 8개의 노드를 삽입하고 높이와 레벨순회하여 출력 ");
+	 	st.put(10, "Orange");
+	 	st.put(40, "Fig");
+	 	st.put(80, "Grape");
+	 	st.put(30, "Cherry");
+	 	st.put(70, "Melon");
+	 	st.put(5, "Peach");//
+	 	st.put(75, "Apple");
+	 	st.put(90,"Chestnut");
+	 	
+	 	/*
+	 	st.put(80, "Grape");
+	 	st.put(85, "Lime");
+	 	st.put(20, "Mango");
+	 	st.put(10, "Strawberry");
+	 	st.put(30, "Cherry");
+	 	st.put(70, "Melon");
+	 	st.put(40, "WaterMelon");
+	 	st.put(75, "Apple");
+	 	st.put(90,"fruit");
+	 	*/
+	 	System.out.println("높이:"+st.getHeight());
+	 	st.levelorder(st.root);
+	 	System.out.println();
+	 	System.out.println();
+	 	
+	 	
+	 	System.out.println("3. 키값 30,80,200을 탐색하여 키와 밸류를 출력하고 없다면 없음을 표시 ");
+	 	Integer targets[] = {30,80,200};
+		for(Integer target : targets) {
+			String result = st.get(target)!=null?"["+target+" "+st.get(target)+"] ":"["+target+"은 BST에 없음] ";
+			System.out.print(result);
+		}
+		
+		System.out.println();
+	 	System.out.println();
+		System.out.println("4. 특정 키 3를 갖는 노드를 삽입(LL회전)하고 트리의 노드와 높이를 출력하기");
+		st.put2(3, "Plum");
+		st.levelorder(st.root);
+		System.out.println();
+		System.out.println("높이:"+st.getHeight());
+		
+		System.out.println();
+	 	System.out.println();
+		System.out.println("5. [특정 키 90인 노드를 삭제,키 110,120를 갖는 노드를 삽입] (RR회전)하고 트리의 노드와 높이를 출력하기");
+		st.delete(90);
+		st.put2(110, "Palm");
+		st.put2(120, "Palm2");
+		
+		st.levelorder(st.root);
+		System.out.println();
+		System.out.println("높이:"+st.getHeight());
+		
+		System.out.println();
+	 	System.out.println();
+		System.out.println("6. [특정 키 75인 노드를 삭제,키 65를 갖는 노드를 삽입] (LR회전)하고 트리의 노드와 높이를 출력하기");
+		st.put2(65, "Coconut");
+		st.delete(75);
+		st.levelorder(st.root);
+		System.out.println();
+		System.out.println("높이:"+st.getHeight());
+		
+		System.out.println();
+	 	System.out.println();
+		System.out.println("7. [특정 키 35,33을 갖는 노드 삽입] (RL회전)하고 트리의 노드와 높이를 출력하기");
+		//st4.delete(90);
+		st.put2(35, "Fruit1");
+		st.put2(33, "Fruit2");
+		st.levelorder(st.root);
+		System.out.println();
+		System.out.println("높이:"+st.getHeight());
+	 	
+	 	
+	}
+	public static class AVL<Key extends Comparable<Key>, Value> {
+		private Node root;
+		public Node getRoot()	{ return root; }
+		public int 	getHeight() { return height(root); }
+		
+		public class Node {
+			private Key id;       	
+			private Value name;   	
+			private int height;   	
+			private Node left, right;  
+			public Node(Key newID, Value newName, int newHt) { // 생성자
+				id = newID;
+				name = newName;
+				height = newHt;
+				left = right = null;
+			}
+			
+			// get과 set 메소드들
+			public Key getKey()  	{ return id; }
+			public Value getValue() { return name; }
+			public Node getLeft() 	{ return left; }
+			public Node getRight() 	{ return right;}
+			public void setKey(Key     newId)  	{ id    = newId; }
+			public void setValue(Value newName) { name  = newName; }
+			public void setLeft(Node   newLeft) { left  = newLeft; }
+			public void setRight(Node  newRight){ right = newRight;}
+		}
+		
+		public Value get(Key k) {return get(root, k);}
+		public Value get(Node n, Key k) {
+			if (n == null)  return null;   // k를 발견 못함
+			int t = n.getKey().compareTo(k);
+			if (t > 0)   	return get(n.getLeft(), k);  // if (k < 노드 n의 id) 왼쪽 서브 트리 탐색
+			else if (t < 0) return get(n.getRight(), k); // if (k > 노드 n의 id) 오른쪽서브 트리 탐색
+			else  			return (Value) n.getValue(); // k를 가진 노드 발견
+		}
+
+		private int height(Node n) { // 높이 계산 
+			if (n == null) return 0;
+			return n.height;
+		}
+
+		public void put(Key k, Value v) {root = put(root, k, v);}  // 삽입 연산
+		public void put2(Key k, Value v) {root = put2(root, k, v);}  // 삽입 연산
+		
+		private Node put(Node n, Key k, Value v) {
+			if (n == null) 	return new Node(k, v, 1);
+			int t = k.compareTo(n.id);
+			if (t < 0) 		n.left  = put(n.left,  k, v);
+			else if (t > 0) n.right = put(n.right, k, v);
+			else {
+				n.name = v;  // k가 이미 트리에 있으므로 Value v만 갱신
+				return n;
+			}
+			n.height = tallerHeight(height(n.left), height(n.right)) + 1;
+			return balance(n); // 노드 n의 균형 점검 및 불균형을 바로 잡음
+		}
+		private Node put2(Node n, Key k, Value v) {
+			if (n == null) 	return new Node(k, v, 1);
+			int t = k.compareTo(n.id);
+			if (t < 0) 		n.left  = put2(n.left,  k, v);
+			else if (t > 0) n.right = put2(n.right, k, v);
+			else {
+				n.name = v;  // k가 이미 트리에 있으므로 Value v만 갱신
+				return n;
+			}
+			n.height = tallerHeight(height(n.left), height(n.right)) + 1;
+			return balance2(n); // 노드 n의 균형 점검 및 불균형을 바로 잡음
+		}
+
+		private Node balance(Node n) { // 불균형 처리
+			if (bf(n) > 1) {  //노드 n의 왼쪽 서브트리가 높아서 불균형 발생
+				if (bf(n.left) < 0) { // 노드 n의 왼쪽자식노드의 오른쪽서브트리가 높은 경우
+					n.left = rotateLeft(n.left);    // LR-회전
+				}
+				n = rotateRight(n);  // LL-회전
+			}
+			else if (bf(n) < -1) {  //노드 n의 오른쪽 서브트리가 높아서 불균형 발생
+				if (bf(n.right) > 0) {  // 노드 n의 오른쪽자식노드의 왼쪽 서브트리가 높은 경우
+					n.right = rotateRight(n.right); // RL-회전
+				}
+				n = rotateLeft(n);  // RR-회전
+			}
+			return n;
+		}
+		
+		private Node balance2(Node n) { // 불균형 처리
+			if (bf(n) > 1) {  //노드 n의 왼쪽 서브트리가 높아서 불균형 발생
+				if (bf(n.left) < 0) { // 노드 n의 왼쪽자식노드의 오른쪽서브트리가 높은 경우
+					System.out.println("[LR회전] Key:"+n.left.getKey()+"을(를) 기준으로 rotateLeft");
+					n.left = rotateLeft(n.left);    // LR-회전
+				}else {
+					System.out.print("[LL회전] ");
+				}
+				System.out.println("Key:"+n.getKey()+"을(를) 기준으로 rotateRight");
+				n = rotateRight(n);  // LL-회전
+				
+			}
+			else if (bf(n) < -1) {  //노드 n의 오른쪽 서브트리가 높아서 불균형 발생
+				if (bf(n.right) > 0) {  // 노드 n의 오른쪽자식노드의 왼쪽 서브트리가 높은 경우
+					System.out.println("[RL회전] Key:"+n.right.getKey()+" 을(를) 기준으로 rotateRight");
+					n.right = rotateRight(n.right); // RL-회전
+				}else {
+					System.out.print("[RR회전] ");
+				}
+				System.out.println("Key:"+n.getKey()+"을(를) 기준으로 rotateLeft");
+				n = rotateLeft(n);  // RR-회전
+			}
+			return n;
+		}
+		
+
+		private int bf(Node n) {  // bf 계산
+			return height(n.left) - height(n.right);  // bf = 왼쪽 서브트리 높이 - 오른쪽 서브트리 높이 	
+		}
+
+		private Node rotateRight(Node n) {  //우로 회전
+			Node x = n.left;
+			n.left = x.right;
+			x.right = n;
+			n.height = tallerHeight(height(n.left), height(n.right)) + 1; // 높이 갱신
+			x.height = tallerHeight(height(x.left), height(x.right)) + 1; // 높이 갱신
+			return x;  // 회전 후 x가 n의 이전 자리로 이동되었으므로 
+		}
+
+		private Node rotateLeft(Node n) {   //좌로 회전
+			Node x = n.right;
+			n.right = x.left;
+			x.left = n;
+			n.height = tallerHeight(height(n.left), height(n.right)) + 1; // 높이 갱신
+			x.height = tallerHeight(height(x.left), height(x.right)) + 1; // 높이 갱신
+			return x;  // 회전 후 x가 n의 이전 자리로 이동되었으므로 
+		}
+
+		private int tallerHeight(int x, int y){  // 높이 비교
+			if (x>y) return x;
+			else return y;
+		}
+
+		public void delete(Key k) {	root = delete(root, k);}  // 삭제 연산
+		private Node delete(Node n, Key k) {
+			int t = k.compareTo(n.id);
+			if (t < 0) 		n.left  = delete(n.left, k);
+			else if (t > 0) n.right = delete(n.right, k);
+			else {
+				if (n.left == null)  	  return n.right;
+				else if (n.right == null) return n.left;
+				else {
+					Node y = n;
+					n = min(y.right);
+					n.right = deleteMin(y.right);
+					n.left = y.left;
+				}
+			}
+			n.height = tallerHeight(height(n.left), height(n.right)) + 1;
+			return balance2(n);
+		}
+
+		public void deleteMin() {root = deleteMin(root);}  // 최솟값 삭제
+		private Node deleteMin(Node n) {
+			if (n.left == null) return n.right;
+			n.left = deleteMin(n.left);
+			n.height = tallerHeight(height(n.left), height(n.right)) + 1;
+			return balance(n);
+		}
+
+		public Key min() {return min(root).id;}  // 최솟값 찾기
+		private Node min(Node n) {
+			if (n.left == null) return n;
+			return min(n.left);
+		}
+
+		public void print(Node root)  {  // 트리 출력
+			System.out.printf("\ninorder:\n");
+			inorder(root);
+			System.out.printf("\npreorder:\n");
+			preorder(root);
+			System.out.printf("\nlevel order:\n");
+			levelorder(root);
+		}
+		public void inorder(Node n){       // 중위 순회
+			if (n != null) {
+				inorder(n.left);   // n의 왼쪽 서브 트리를 순회하기 위해
+				System.out.print(n.id+" ");  // 노드 n 방문
+				inorder(n.right);  // n의 오른쪽 서브 트리를 순회하기 위해
+			}
+		}
+		public void levelorder(Node root) { // 레벨 순회
+			Queue<Node> q = new LinkedList<Node>(); // 큐 자료구조 이용
+			Node t;
+			q.add(root);  // 루트 노드 큐에 삽입
+			while (!q.isEmpty()) { 
+				t = q.remove();   //큐에서 가장 앞에 있는 노드 제거
+				System.out.print("["+t.getKey()+" "+t.getValue()+"] "); // 제거된 노드 출력(방문)
+				if (t.left != null)      // 제거된 왼쪽 자식이 null이 아니면
+					q.add(t.left);       // 큐에 왼쪽 자식 삽입
+				if (t.right != null)     // 제거된 오른쪽 자식이 null이 아니면
+					q.add(t.right);      // 큐에  오른쪽 자식 삽입
+			} 
+		}
+		
+		public void preorder(Node n) {     // 전위 순회
+			if (n != null) {
+				System.out.print(n.id+" ");  // 노드 n 방문
+				preorder(n.left);  // n의 왼쪽    서브 트리를 순회하기 위해
+				preorder(n.right); // n의 오른쪽 서브 트리를 순회하기 위해
+			}
+		}
+	
+	}
+
+}
+[콘솔창 결과]
+1. 초기에 삽입한 노드로 구서오딘 트리의 노드들과 높이를 출력
+높이:3
+[40 Grape] [20 Mango] [70 Cherry] [10 Strawberry] [30 Apple] [60 Banana] [100 Lime] 
+
+2. 1의 AVL트리에 추가하여 8개의 노드를 삽입하고 높이와 레벨순회하여 출력 
+높이:4
+[40 Fig] [20 Mango] [80 Grape] [10 Orange] [30 Cherry] [70 Melon] [100 Lime] [5 Peach] [60 Banana] [75 Apple] [90 Chestnut] 
+
+3. 키값 30,80,200을 탐색하여 키와 밸류를 출력하고 없다면 없음을 표시 
+[30 Cherry] [80 Grape] [200은 BST에 없음] 
+
+4. 특정 키 3를 갖는 노드를 삽입(LL회전)하고 트리의 노드와 높이를 출력하기
+[LL회전] Key:10을(를) 기준으로 rotateRight
+[40 Fig] [20 Mango] [80 Grape] [5 Peach] [30 Cherry] [70 Melon] [100 Lime] [3 Plum] [10 Orange] [60 Banana] [75 Apple] [90 Chestnut] 
+높이:4
+
+
+5. [특정 키 90인 노드를 삭제,키 110,120를 갖는 노드를 삽입] (RR회전)하고 트리의 노드와 높이를 출력하기
+[RR회전] Key:100을(를) 기준으로 rotateLeft
+[40 Fig] [20 Mango] [80 Grape] [5 Peach] [30 Cherry] [70 Melon] [110 Palm] [3 Plum] [10 Orange] [60 Banana] [75 Apple] [100 Lime] [120 Palm2] 
+높이:4
+
+
+6. [특정 키 75인 노드를 삭제,키 65를 갖는 노드를 삽입] (LR회전)하고 트리의 노드와 높이를 출력하기
+[LR회전] Key:60을(를) 기준으로 rotateLeft
+Key:70을(를) 기준으로 rotateRight
+[40 Fig] [20 Mango] [80 Grape] [5 Peach] [30 Cherry] [65 Coconut] [110 Palm] [3 Plum] [10 Orange] [60 Banana] [70 Melon] [100 Lime] [120 Palm2] 
+높이:4
+
+
+7. [특정 키 35,33을 갖는 노드 삽입] (RL회전)하고 트리의 노드와 높이를 출력하기
+[RL회전] Key:35 을(를) 기준으로 rotateRight
+Key:30을(를) 기준으로 rotateLeft
+[40 Fig] [20 Mango] [80 Grape] [5 Peach] [33 Fruit2] [65 Coconut] [110 Palm] [3 Plum] [10 Orange] [30 Cherry] [35 Fruit1] [60 Banana] [70 Melon] [100 Lime] [120 Palm2] 
+높이:4

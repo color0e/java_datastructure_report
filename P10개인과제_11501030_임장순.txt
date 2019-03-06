@@ -1,0 +1,478 @@
+﻿자료구조 P10 개인과제 (1,2,3) 정보보호학과 11501030임장순
+
+과제 1.최대힙 자료구조 구현
+
+[소스코드]
+public class P10_1 {
+	public static class Entry <Key extends Comparable<Key>, Value>{
+		private Key   ky;
+		private Value val;
+		public Entry (Key newKey, Value newValue){ //생성자
+			ky  = newKey;
+			val = newValue;
+		}
+		// get메소드와 set 메소드들
+		public Key   getKey()   { return ky;}
+		public Value getValue() { return val;}
+		public void  setKey(Key newKey)       { ky  = newKey;}
+		public void  setValue(Value newValue) { val = newValue;}
+		@Override
+		public String toString() {
+			return "[" + ky + "," + val + "]";
+		}
+		
+	}
+	
+	public static class MaximumHeap<Key extends Comparable<Key>, Value> {
+		private Entry[] a;      // a[0]은 사용 안함
+		private int N;          // 힙의 크기, 즉, 힙에 있는 항목 수
+		public MaximumHeap(Entry[] harray, int initialSize) {  // 생성자  
+			a = harray;  N = initialSize;
+		}
+		public int size() { return N; } // 힙의 크기 리턴
+		public void createHeap() {      // 초기 힙 만들기     
+			for(int i = N/2; i > 0; i--)  downheap(i);
+		}
+		public void insert(Key newKey, Value newValue) { // 새로운 항목 삽입
+			Entry temp = new Entry(newKey, newValue);	 // Entry 생성 
+			a[++N] = temp;        // 새로운 키(항목)를 배열 마지막 원소 다음에 저장
+			upheap(N);            // 위로 올라가며 힙속성 회복시키기 위해
+		}
+		
+		public Entry deleteMin() {   // 최솟값 삭제
+			Entry min = a[1];     // a[1]의 최솟값을 min으로 저장하여 리텬
+			swap(1, N--);         // 힙의 마지막 항목과 교환하고 힙 크기 1 감소
+			a[N+1] = null;        // 마지막 항목을 null로 처리
+			downheap(1);          // 힙속성을 회복시키기 위해
+			return min;
+		}
+
+		private void downheap(int i) {   // i는 현재 노드의 인덱스
+			while (2*i <= N) {           // i의 왼쪽 자식노드가 힙에 있으면
+				int k = 2*i;             // k는 왼쪽 자식노드의 인덱스
+				if (k < N && greater(k, k+1)) k++; //왼쪽과 오른쪽 자식의 승자를 결정하여 k가 승자 인덱스가됨
+				if (!greater(i, k)) break;  // 현재 노드가 자식 승자와 같거나 크면 루프를 중단하고
+				swap(i, k);              // 현재 노드가 자식 승자보다 작으면 현재 노드와 자식 숭자와 교환
+				i = k;                   // 자식 승자가 현재 노드가 되어 다시 반복하기 위해
+			}
+		}
+
+		private void upheap(int j) {     // j는 현재 노드의 인덱스
+			while (j > 1 && greater(j/2, j)) { // 현재노드가 루트가 아니고 동시에 부모가 작으면
+				swap(j/2, j);            // 부모와 현재 노드 교환
+				j = j/2;                 // 부모가 현재 노드가 되어 다시 반복하기 위해
+			}
+		}	
+		
+		private boolean greater(int i, int j) { // 키 비교
+			return a[j].getKey().compareTo(a[i].getKey()) > 0;  }	
+		
+		private void swap(int i, int j) {      // a[i]와 a[j]를 교환
+			Entry temp = a[i];   a[i] = a[j];   a[j] = temp; }	
+		public void print(){  
+			for (int i = 1; i < N+1; i++) {
+				System.out.printf("["+a[i].getKey()+" "+a[i].getValue() + "] ");
+			}
+		}
+	}
+
+	
+	public static void main(String[] args) {
+		Entry[] soldiers = {new Entry(null,null),new Entry(25,"소위"),new Entry(26,"중위"),new Entry(28,"대위")
+				,new Entry(21,"이병"),new Entry(22,"일병"),new Entry(23,"상병"),new Entry(24,"병장")
+				,new Entry(31,"소령"),new Entry(34,"중령"),new Entry(40,"대령")
+				,new Entry(46,"소장"),new Entry(55,"대장")};
+		Entry[] trees = {new Entry(null,null),new Entry("pine",100),new Entry("oak",16),new Entry("ginkgo",18)
+				,new Entry("maple",21),new Entry("rose",12),new Entry("palm",23),new Entry("mango",14)
+				,new Entry("acacia",30),new Entry("apple",24),new Entry("pear",30)
+				,new Entry("sequoia",200),new Entry("bamboo",45)};
+		
+		System.out.print("(객체배열의 원소) ");
+		for(int i=0;i<soldiers.length;i++) {
+			System.out.print(soldiers[i]+" ");
+		}
+		System.out.println();
+		MaximumHeap maxheap = new MaximumHeap(soldiers,12);
+		maxheap.createHeap();
+		System.out.print("(숫자 키로 한 최대힙 데이터) ");
+		maxheap.print();
+		System.out.println("최대힙 크기 = "+maxheap.size());
+		System.out.println(maxheap.deleteMin()+"<==인 루트노드가 삭제됨");
+		Entry newsoldier = new Entry(45,"상사");
+		maxheap.insert(newsoldier.getKey(), newsoldier.getValue());
+		System.out.println(newsoldier+"<==인 노드가 삽입됨");
+		System.out.print("(루트노드삭제,한노드 추가한 최대힙 데이터) ");
+		maxheap.print();
+		System.out.println("최대힙 크기 = "+maxheap.size()+"\n");
+		System.out.print("(객체배열의 원소) ");
+		for(int i=0;i<trees.length;i++) {
+			System.out.print(trees[i]+" ");
+		}
+		System.out.println();
+		maxheap = new MaximumHeap(trees,12);
+		maxheap.createHeap();
+		System.out.print("(문자열 키로 한 최대힙 데이터) ");
+		maxheap.print();
+		System.out.println("최대힙 크기 = "+maxheap.size());
+		System.out.println(maxheap.deleteMin()+"<==인 루트노드가 삭제됨");
+		Entry newtree = new Entry("fig",33);
+		maxheap.insert(newtree.getKey(), newtree.getValue());
+		System.out.println(newtree+"<==인 노드가 삽입됨");
+		System.out.print("(삭제,삽입후 힙데이터) ");
+		maxheap.print();
+		System.out.println(" 최대힙 크기 = "+maxheap.size());
+		System.out.print(maxheap.deleteMin()+",");
+		System.out.print(maxheap.deleteMin()+"<==인 루트노드가 삭제됨 :");
+		System.out.println("최대힙 크기 = "+maxheap.size());
+		System.out.print("(삭제2회후 힙데이터) ");
+		maxheap.print();
+	}
+}
+
+[콘솔창 결과]
+(객체배열의 원소) [null,null] [25,소위] [26,중위] [28,대위] [21,이병] [22,일병] [23,상병] [24,병장] [31,소령] [34,중령] [40,대령] [46,소장] [55,대장] 
+(숫자 키로 한 최대힙 데이터) [55 대장] [46 소장] [28 대위] [34 중령] [40 대령] [25 소위] [24 병장] [31 소령] [21 이병] [26 중위] [22 일병] [23 상병] 최대힙 크기 = 12
+[55,대장]<==인 루트노드가 삭제됨
+[45,상사]<==인 노드가 삽입됨
+(루트노드삭제,한노드 추가한 최대힙 데이터) [46 소장] [40 대령] [45 상사] [34 중령] [26 중위] [28 대위] [24 병장] [31 소령] [21 이병] [23 상병] [22 일병] [25 소위] 최대힙 크기 = 12
+
+(객체배열의 원소) [null,null] [pine,100] [oak,16] [ginkgo,18] [maple,21] [rose,12] [palm,23] [mango,14] [acacia,30] [apple,24] [pear,30] [sequoia,200] [bamboo,45] 
+(문자열 키로 한 최대힙 데이터) [sequoia 200] [rose 12] [palm 23] [maple 21] [pine 100] [ginkgo 18] [mango 14] [acacia 30] [apple 24] [pear 30] [oak 16] [bamboo 45] 최대힙 크기 = 12
+[sequoia,200]<==인 루트노드가 삭제됨
+[fig,33]<==인 노드가 삽입됨
+(삭제,삽입후 힙데이터) [rose 12] [pine 100] [palm 23] [maple 21] [pear 30] [ginkgo 18] [mango 14] [acacia 30] [apple 24] [bamboo 45] [oak 16] [fig 33]  최대힙 크기 = 12
+[rose,12],[pine,100]<==인 루트노드가 삭제됨 :최대힙 크기 = 10
+(삭제2회후 힙데이터) [pear 30] [oak 16] [palm 23] [maple 21] [fig 33] [ginkgo 18] [mango 14] [acacia 30] [apple 24] [bamboo 45] 
+
+과제 2. Huffman Coding & Decoding
+
+[소스코드]
+import java.util.HashMap;
+import java.util.Iterator;
+
+public class HuffmanCD {
+	public static class HEntry {
+		private int    frequency;  // 빈도 수
+		private String word;       // 이파리 노드의 문자 또는 내부노드의 합성된 문자열 
+		private HEntry  left;       // 왼쪽 자식
+		private HEntry  right;      // 오른쪽 자식
+		private String code;       // 허프만 코드
+		
+		public HEntry (int newFreq, String newValue, HEntry l, HEntry r, String s){
+			frequency = newFreq;  word  = newValue;
+			left  = l;  right = r;  code  = s;
+		}
+		public int    getFreq()   { return frequency; }
+		public String getWord() { return word; }
+		public String getCode()  { return code; }
+		public HEntry  getLeft()  { return left; }
+		public HEntry  getRight() { return right; }
+		public void   setCode(String newCode) { code = newCode; }
+	}
+	private HEntry[] a;      // a[0]은 사용 안함
+	private int N;           // 힙의 크기
+	private HashMap<Character,String> table = new HashMap<Character,String>();
+	public HuffmanCD(HEntry[] harray, int initialSize) {  // 생성자  
+		a = harray;  N = initialSize;
+	}
+
+	public int size() { return N; } // 힙의 크기 리턴
+	
+	public void createHeap() {      // 최소힙 만들기
+		for(int i = N/2; i > 0; i--) downheap(i);
+	}
+	
+	public HEntry createTree(){
+		HEntry e1, e2, t;
+		while (size() > 1){           // 힙에 1개의 노드만 남을 때까지
+			e1 = deleteMin();  // 힙에서 최소 빈도수 가진 노드 제거하여 e1이 참조
+			e2 = deleteMin();  // 힙에서 최소 빈도수 가진 노드 제거하여 e2이 참조
+			t = new HEntry(e1.getFreq()+e2.getFreq(),     // e1과 e2의 빈도수를 합산
+					          e1.getWord()+e2.getWord(),  // string 이어붙이기
+					          e1, e2, " ");	    // e1,e2가 각각 새노드의 왼쪽,오른쪽 자식 
+			insert(t);   // 새 노드를 힙에 삽입
+		}
+		return deleteMin(); // 1개 남은 노드(루트 노드)를 힙에서 제거하며 리턴
+	}
+	
+	public void leafNode(HEntry node){ // 전위순회하며 허프만 코드를 만들고, 각 이파리 노드에서 코드 출력
+		if (node.getLeft() != null){
+			node.getLeft().setCode(node.getCode()+"0");  // 왼쪽으로 내려가면 코드에 0 추가
+			leafNode(node.getLeft());
+		}
+		if (node.getRight() != null){
+			node.getRight().setCode(node.getCode()+"1"); // 오른쪽으로 내려가면 코드에 1 추가
+			leafNode(node.getRight());
+		}
+		if(node.getWord().length() == 1){     // 현재 노드가 이파리 노드이면, 허프만 코드 출력
+			System.out.print(node.getWord()+"="+node.getCode()+"  ");
+		}
+	}
+
+	public void insert(HEntry newEntry) {
+		a[++N] = newEntry;        // 새로운 키를 배열 마지막 원소 다음에 저장
+		upheap(N);                // 위로 올라가며 힙 속성 회복시키기 위해
+	} 
+
+	public HEntry deleteMin() {
+		HEntry max = a[1];     // a[1]의 최대값을 max로
+		swap(1, N--);         // 힙의 마지막 항목과 교환하고 힙 크기를 1 감소
+		a[N+1] = null;        // 마지막 항목을 null로 처리
+		downheap(1);          // 힙 속성을 회복시키기 위해
+		return max;
+	}
+	
+	private void downheap(int i) {   // i는 현재 노드의 인덱스
+		while (2*i <= N) {           // i의 왼쪽 자식노드가 힙에 있으면
+			int k = 2*i;             // k는 왼쪽 자식노드의 인덱스
+			if (k < N && greater(k, k+1)) k++;   //왼쪽과 오른쪽자식의 숭자를 결정하여 k가 승자 인덱스가됨
+			if (!greater(i, k)) break;           // 현재 노드가 자식 승자와 같거나 크면 루프를 중단하고
+			swap(i, k);              // 현재 노드가 자식 승자보다 작으면 현재 노드와 자식 승자와 교환
+			i = k;                   // 자식 승자가 현재 노드가 되어 다시 반복하기 위해
+		}
+	}
+
+	private void upheap(int j) {           // j는 현재 노드의 인덱스
+		while (j > 1 && greater(j/2, j)) { // 현재노드가 루트가 아니고 동시에 부모가 작으면
+			swap(j/2, j);                  // 부모와 현재 노드 교환
+			j = j/2;                       // 부모가 현재 노드가 되어 다시 반복하기 위해
+		}
+	}
+	
+	private boolean greater(int i, int j) {  
+		return a[i].getFreq()> a[j].getFreq();  }
+	
+	private void swap(int i, int j) { // a[i]와  a[j]를 교환
+		HEntry temp = a[i];   a[i] = a[j];   a[j] = temp; }
+
+	public void print(){  // 힙 출력
+		for (int i = 1; i < N+1; i++) {
+			System.out.printf("["+a[i].getFreq()+", "+a[i].getWord() + "] ");
+		}
+		System.out.println(); 
+	}
+	
+	public void preorder(HEntry node){ // 전위순회하며 허프만 코드를 만들고, 각 이파리 노드에서 코드 출력
+		if (node != null){
+			System.out.print(node.getWord()+"="+node.getFreq()+"  ");
+			preorder(node.getLeft());
+			preorder(node.getRight());
+		}
+	}
+	
+	public void codeGen(HEntry a) {
+		if (a.getLeft() != null){
+			codeGen(a.getLeft());
+		}
+		if (a.getRight() != null){
+			codeGen(a.getRight());
+		}
+		if(a.getWord().length() == 1){  
+			table.put(a.getWord().charAt(0),a.getCode());
+		}
+	}
+	public String Coding(char a) {
+		String code = table.get(a);
+		return code;
+	}
+	public void codePrint() {
+		Iterator<Character> iter = table.keySet().iterator();
+		while(iter.hasNext()) {
+			Character key = iter.next();
+			System.out.print("["+key+":"+table.get(key)+"]"+" ");
+		}
+	}
+	
+	public String decode(StringBuffer comp , HEntry n) {
+		char[] chars = comp.toString().toCharArray();
+		HEntry temp = n;
+		String result="";
+		for(int i=0;i<comp.length();i++) {			
+			    if(chars[i]=='0') {
+						temp=temp.getLeft();
+						if(temp.getWord().length()==1) {
+							result+=temp.getWord();
+							temp=n;
+						}
+				}else if(chars[i]=='1') {
+						temp=temp.getRight();
+						if(temp.getWord().length()==1) {
+							result+=temp.getWord();
+							temp=n;
+						}
+				}
+		}
+		return result;
+	}
+	public static void main(String[] args)	{
+		HEntry[] a;  
+		a = new HEntry[7];
+
+		a[1] = new HEntry(60, "a", null, null, null);	a[2] = new HEntry(20, "b", null, null, null);  	    
+		a[3] = new HEntry(30, "c", null, null, null);   a[4] = new HEntry(35, "d", null, null, null);  		
+		a[5] = new HEntry(40, "e", null, null, null);   a[6] = new HEntry(90, "f", null, null, null);  	     	
+
+		HuffmanCD h = new HuffmanCD(a,6);
+		System.out.println("1. 입력된 문자통계 데이터의 객체 배열:");
+		h.print();
+
+		System.out.println("2. 최소힙의 생성과 노드 데이터 출력:"); 
+		h.createHeap();  h.print();
+
+		System.out.println("3. 허프만 트리의 생성과 노드 데이터 출력:"); 
+		HEntry root = h.createTree();  h.preorder(root);
+		System.out.println();
+		
+		System.out.println("4. 허프만 트리의 leaf node에 저장된 압축 코드:");
+		h.leafNode(root);  System.out.println();
+		System.out.println("5. 허프만 트리의 압축코드변환표 생성과 출력:");
+		h.codeGen(root);
+		h.codePrint();
+		System.out.println();
+		System.out.println("6.샘플문장 acefebebdacf의 허프만 압축과 결과코드 출력");
+		String sample = "acefebebdacf";
+		StringBuffer code=new StringBuffer();
+		for(char c : sample.toCharArray()) {
+			code.append(h.Coding(c));
+		}
+		System.out.println(code);
+		System.out.println("7.압축코드 "+code+" 의 허프만 트리를 이용한 복원과 결과문자열 출력:");
+		System.out.println(h.decode(code, root));
+	}
+}
+
+[콘솔창 결과]
+1. 입력된 문자통계 데이터의 객체 배열:
+[60, a] [20, b] [30, c] [35, d] [40, e] [90, f] 
+2. 최소힙의 생성과 노드 데이터 출력:
+[20, b] [35, d] [30, c] [60, a] [40, e] [90, f] 
+3. 허프만 트리의 생성과 노드 데이터 출력:
+bcadef=275  bca=110  bc=50  b=20  c=30  a=60  def=165  de=75  d=35  e=40  f=90  
+4. 허프만 트리의 leaf node에 저장된 압축 코드:
+b= 000  c= 001  a= 01  d= 100  e= 101  f= 11  
+5. 허프만 트리의 압축코드변환표 생성과 출력:
+[a: 01] [b: 000] [c: 001] [d: 100] [e: 101] [f: 11] 
+6.샘플문장 acefebebdacf의 허프만 압축과 결과코드 출력
+ 01 001 101 11 101 000 101 000 100 01 001 11
+7.압축코드  01 001 101 11 101 000 101 000 100 01 001 11 의 허프만 트리를 이용한 복원과 결과문자열 출력:
+acefebebdacf
+
+과제3. JAVA PriorityQueue
+
+[소스코드]
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.PriorityQueue;
+
+public class priorityQ {	
+	public static void main(String[] args) {
+		PriorityQueue<Integer> iq = new PriorityQueue<Integer>();
+		Integer[] nums = {10,2,-3,4,5};
+		for(Integer num:nums) {
+		iq.add(num);
+		}
+		while(!iq.isEmpty()) {
+			System.out.print(iq.poll()+" ");
+		}
+		System.out.println();
+		Integer[] nums2 = {1,-1,3};
+		iq=new PriorityQueue<Integer>();
+		iq.addAll(Arrays.asList(nums2));
+		Iterator<Integer> iter = iq.iterator();
+		while(iter.hasNext()) {
+			System.out.print(iter.next()+" ");
+		}
+		System.out.println();
+		PriorityQueue<Character> cq = new PriorityQueue<Character>(Collections.reverseOrder());
+		for(int i=4;i>=0;i--) {
+			cq.add((char) ('A'+i));
+		}
+		while(!cq.isEmpty()) {
+			System.out.print(cq.poll()+" ");
+		}
+		System.out.println();
+		String[] strs = {"2","4","3","가","a","바나나","banana"};
+		PriorityQueue<String> sq = new PriorityQueue<String>();
+		for(String str : strs) {
+			sq.add(str);
+		}
+		while(!sq.isEmpty()) {
+			System.out.print(sq.poll()+" ");
+		}	
+		System.out.println();
+		PriorityQueue<NodeN> nq = new PriorityQueue<NodeN>();
+		NodeN[] nodens = {new NodeN(1,"kim"),new NodeN(-2,"park"),new NodeN(-4,"lee"),new NodeN(6,"choi")};
+		for(NodeN noden : nodens) {
+			nq.add(noden);
+		}
+		while(!nq.isEmpty()) {
+			System.out.print(nq.poll()+" ");
+		}
+		System.out.println();
+		PriorityQueue<Node> nq2 = new PriorityQueue<Node>();
+		Node[] nodes = {new Node("kim",1),new Node("park",-2),new Node("lee",-4),new Node("choi",6)};
+		for(Node node : nodes) {
+			nq2.add(node);
+		}
+		Iterator iter2 = nq2.iterator();
+		while(iter2.hasNext()) {
+			System.out.print(iter2.next()+" ");
+		}
+	}
+	public static class NodeN implements Comparable<NodeN>{
+		int num;
+		String name;
+		NodeN(int num,String name){
+			this.num=num;
+			this.name=name;			
+		}
+		
+		@Override
+		public String toString() {
+			return "[" + num + "," + name + "]";
+		}
+
+		@Override
+		public int compareTo(NodeN node) {
+			// TODO Auto-generated method stub
+			if(this.num > node.num) return 1;
+			else if(this.num < node.num) return -1;
+			return 0;
+		}
+		
+	}
+	public static class Node implements Comparable<Node>{
+		String name;
+		int num;
+		Node(String name,int num){
+			this.num=num;
+			this.name=name;			
+		}
+		
+		@Override
+		public String toString() {
+			return "[" + name + "," + num + "]";
+		}
+
+		@Override
+		public int compareTo(Node node) {
+			// TODO Auto-generated method stub
+			if(this.name.compareTo(node.name)>0) {
+				return 1;
+			}else if(this.name.compareTo(node.name)<0) {
+				return -1;
+			}
+			return 0;
+		}
+		
+	}
+}
+
+[콘솔창 결과]
+-3 2 4 5 10 
+-1 1 3 
+E D C B A 
+2 3 4 a banana 가 바나나 
+[-4,lee] [-2,park] [1,kim] [6,choi] 
+[choi,6] [kim,1] [lee,-4] [park,-2] 

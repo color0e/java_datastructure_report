@@ -1,0 +1,113 @@
+P5 개인과제 
+
+[소스코드]
+import java.util.NoSuchElementException;
+
+public class P5_1 {
+	public static class ListQueue <E> {
+		private Node<E> front, rear;
+		private int size;
+		
+		public class Node <E> {
+			private E       item;     
+			private Node<E> next;
+			
+			public Node(E newItem, Node<E> node){  // 생성자
+				item = newItem;
+				next = node;
+			}
+			// get 메소드들과 set 메소드 들
+			public E       getItem()               { return item; }
+			public Node<E> getNext()               { return next; }
+			public void    setItem(E newItem)      { item = newItem; }
+			public void    setNext(Node<E> newNext){ next = newNext; }
+		}
+
+		public ListQueue() {   // 생성자
+			front = rear = null;
+			size  = 0;
+		}
+		
+		public int     size()    { return size; }        // 큐의 항목의 수를 리턴
+		public boolean isEmpty() { return size() == 0; } // 큐가 empty이면 true 리턴
+
+		public void add(E newItem){
+			Node newNode = new Node(newItem, null);      // 새 노드 생성
+			if (isEmpty()) front = newNode; // 큐가 empty이었으면  front도 newNode를 가리키게 한다
+			else rear.setNext(newNode);		// 그렇지않으면 rear의 next를 newNode를 가리키게 한다
+			rear = newNode;					// 마지막으로 rear가 newNode를 가리키게 한다
+			size++;							// 큐 항목 수 1 증가
+		}
+
+		public E remove() {
+			if (isEmpty()) throw new NoSuchElementException(); // underflow 경우에 프로그램 정지
+			E frontItem = front.getItem();	// front가 가리키는 노드의 항목을 frontItem에 저장
+			front = front.getNext();		// front가 front 다음 노드를 가리키게 한다.
+			if (isEmpty()) rear = null;		// 큐가 empty이면 rear = null
+			size--;							// 큐 항목 수 1 감소
+			return frontItem;
+		}
+		
+		public void print() { // 큐의 항목들을 front부터 차례로 출력
+			if (isEmpty()) System.out.print("큐가 empty임");      
+			else 
+				for (Node p = front; p != null; p = p.getNext()) 
+					System.out.print(p.getItem()+"\t ");
+			System.out.println();
+		}
+	}
+	public static class Student{
+		String name;
+		int num;
+		Student(){
+			
+		}
+		Student(String name,int num){
+			this.name = name;
+			this.num = num;
+		}
+		public String getName() {
+			return this.name;
+		}
+		public int getNum() {
+			return this.num;
+		}
+	}
+	public static void main(String[] args) {
+		ListQueue<Student> q = new ListQueue<Student>();
+		Student student[] = {new Student("김지수",1501),new Student("이학인",1502),
+		new Student("임장순",1503),new Student("전지환",1504),new Student("김태연",1504)};
+			System.out.print("[객체배열에 저장된 학생] ");
+			for(Student st: student) {
+			System.out.print("(학생이름:"+st.getName()+" 학번:"+st.getNum()+") ");
+			q.add(st);
+			}
+			System.out.println();
+			System.out.println("[객체배열에 저장된 저장된 학생의 수] "+student.length);
+			System.out.println("--객체배열의 모든 학생객체가 큐에 삽입되었음--");
+		    
+			/*
+		     * 큐에 저장된 3명의 학생 삭제
+		     */
+			for(int i=0;i<3;i++) {
+		    	q.remove();
+		    }
+			
+			/*
+			 * 학생 자료구조,11616 추가
+			 */
+			q.add(new Student("자료구조",11616));
+			
+			System.out.print("[큐에서 꺼낸 학생리스트] ");
+			while(!q.isEmpty()) {
+				Student st2 = q.remove();
+				System.out.print("(학생이름:"+st2.getName()+" 학번:"+st2.getNum()+") ");
+			}
+			System.out.println();
+	}
+}
+[콘솔창 결과]
+[객체배열에 저장된 학생] (학생이름:김지수 학번:1501) (학생이름:이학인 학번:1502) (학생이름:임장순 학번:1503) (학생이름:전지환 학번:1504) (학생이름:김태연 학번:1504) 
+[객체배열에 저장된 저장된 학생의 수] 5
+--객체배열의 모든 학생객체가 큐에 삽입되었음--
+[큐에서 꺼낸 학생리스트] (학생이름:전지환 학번:1504) (학생이름:김태연 학번:1504) (학생이름:자료구조 학번:11616) 

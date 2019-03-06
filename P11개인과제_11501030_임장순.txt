@@ -1,0 +1,76 @@
+﻿자료구조 P11개인과제 (3) 정보보호학과 11501030임장순
+
+과제 3. 방향 그래프의 위상정렬
+
+[소스코드]
+package P11_3;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+public class TopologicalSort {
+	public static class Edge {
+		int adjvertex;
+		public Edge(int v) {
+			adjvertex = v;
+		}
+	}
+	int N;
+	boolean[] visited;
+	List<Edge>[] adjList;
+	List<Integer> sequence;
+	public TopologicalSort(List<Edge>[] graph) {
+		N = graph.length;
+		visited = new boolean[N];
+		adjList = graph;
+		sequence = new ArrayList<>();
+	}
+	public List<Integer> tsort(){
+		for(int i=0;i<N;i++) if (!visited[i]) dfs(i);
+		Collections.reverse(sequence);
+		return sequence;
+	}
+	public void dfs(int i) {
+		visited[i] = true;
+		for(Edge v : adjList[i]) {
+			if(!visited[v.adjvertex]) dfs(v.adjvertex);
+		}
+		sequence.add(i);
+	}
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		List<Edge>[] adjList = new List[9];
+		for(int i=0;i<9;i++) {
+			adjList[i]=new LinkedList<>();
+		}
+		Edge e0 = new Edge(0);
+		Edge e1 = new Edge(1);
+		Edge e2 = new Edge(2);
+		Edge e3 = new Edge(3);
+		Edge e4 = new Edge(4);
+		Edge e5 = new Edge(5);
+		Edge e6 = new Edge(6);
+		Edge e7 = new Edge(7);
+		Edge e8 = new Edge(8);
+		Edge e9 = new Edge(9);
+		adjList[0].add(e1);
+		adjList[1].add(e4);
+		adjList[1].add(e3);
+		adjList[2].add(e1);
+		adjList[2].add(e0);
+		adjList[3].add(e6);
+		adjList[4].add(e5);
+		adjList[5].add(e3);
+		adjList[5].add(e7);
+		adjList[6].add(e7);
+		adjList[7].add(e8);
+		TopologicalSort tpls = new TopologicalSort(adjList);
+		System.out.println(tpls.tsort());
+	}
+
+}
+
+[콘솔창 결과]
+[2, 0, 1, 4, 5, 3, 6, 7, 8]

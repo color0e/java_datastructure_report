@@ -1,0 +1,188 @@
+P6 과제2번(개인과제)_배타적 집합의 연산    1130 임장순
+
+[소스코드]
+public class P6_2 {
+	static class SNode {
+		  int parent;  
+		  int rank;
+		  
+		  public SNode(int newParent, int newRank){
+			  parent = newParent;  rank   = newRank; 
+		  }
+	}
+
+	public static class UnionFind {  
+		protected  SNode[] a;
+	    SNode temp = new SNode(0,0);
+		public UnionFind(SNode[] iarray) {  // 생성자
+			a = iarray;
+			for (int i = 0; i < a.length; i++)  a[i] = new SNode(i, 0);
+			// 초기에 모든 노드는 자신을 부모로 하고 rank는 0 인 단일 노드의 집합으로 구성됨
+		}
+
+		//i가 속한 집합의 루트 노드를 재귀적으로 찾고 최종적으로 경로상의 각 원소의 부모를 루트 노드로 만든다.
+		protected int find(int i) { // 경로 압축
+			if ( i != a[i].parent) {   
+				a[i].parent = find(a[i].parent); //리턴하며 경로상의 각 노드의 부모가 루트가되게 만든다.
+			}
+				return a[i].parent;
+		}
+		
+		protected int find2(int i) { // 경로 압축
+			if ( i != a[i].parent) {
+				if( a[i].parent!=a[a[i].parent].parent) {
+				System.out.println("[경로압축발생] (노드)"+i+"의 (부모노드)"+a[i].parent+"를 "+a[a[i].parent].parent+"으로 갱신");
+				}
+				a[i].parent = find2(a[i].parent); //리턴하며 경로상의 각 노드의 부모가 루트가되게 만든다.
+			}
+				return a[i].parent;
+		}
+		
+		public int getRoot(int i) {
+			if (i != a[i].parent) {
+		    i=a[i].parent;
+			return getRoot(i);
+			}
+			return i;
+		}
+
+		public void union(int i, int j) {  // Union 연산, i 부모, j 자식
+			int iroot = find(i);    
+			int jroot = find(j);
+			if (iroot == jroot) return;  // 루트 노드가 동일하면 더이상의 수행없이 그대로 리턴
+			// rank가 높은 루트 노드가 승자가 된다.
+			if (a[iroot].rank > a[jroot].rank) a[jroot].parent = iroot;   // iroot가 승자
+			else if (a[iroot].rank < a[jroot].rank) {
+				if (a[iroot].rank == 0) {
+					a[iroot].rank = a[jroot].rank+1;  // start of link
+					a[j].parent = i;
+				}
+				else  a[iroot].parent = jroot;   // jroot가 승자
+			}
+			else {
+				a[jroot].parent = iroot;   // 둘중에 하나 임의로 승자
+				a[iroot].rank++;        // iroot의 rank 1 증가
+			}
+		}
+		
+		public void union2(int i, int j) {  // Union 연산, i 부모, j 자식
+			int iroot = find2(i);    
+			int jroot = find2(j);
+			if (iroot == jroot) return;  // 루트 노드가 동일하면 더이상의 수행없이 그대로 리턴
+			// rank가 높은 루트 노드가 승자가 된다.
+			if (a[iroot].rank > a[jroot].rank) a[jroot].parent = iroot;   // iroot가 승자
+			else if (a[iroot].rank < a[jroot].rank) {
+				if (a[iroot].rank == 0) {
+					a[iroot].rank = a[jroot].rank+1;  // start of link
+					a[j].parent = i;
+				}
+				else  a[iroot].parent = jroot;   // jroot가 승자
+			}
+			else {
+				a[jroot].parent = iroot;   // 둘중에 하나 임의로 승자
+				a[iroot].rank++;        // iroot의 rank 1 증가
+			}
+		}
+	}
+	public static void main(String[] args) {
+		SNode[] nodes = new SNode[15];
+		for(int i=0;i<nodes.length;i++) {
+			nodes[i]=new SNode(i,0);
+		}
+		UnionFind uni = new UnionFind(nodes);
+		//짝수 집합
+		uni.union(6, 8); uni.union(4, 2); uni.union(6, 10);
+		uni.union(4, 12); uni.union(10, 4);
+		
+	    //홀수 집합
+		uni.union(3, 5); uni.union(5, 7); uni.union(7, 9);
+		uni.union(9, 11); uni.union(11, 13);
+		
+		//기타집합
+		uni.union(0, 1); uni.union(1, 14);
+		
+		System.out.println("**12회의 Union 연산 수행후**");
+		System.out.println("i  | Parent | rank | root ");
+		int index=0;
+		for(SNode node : uni.a) {
+			System.out.println(index+"\t"+node.parent+"\t"+node.rank+"\t"+uni.getRoot(index));
+			index++;
+		}
+		System.out.println();
+		System.out.println("**union(2,9) 수행후**");
+		uni.union2(2, 9);
+		System.out.println("i  | Parent | rank | root");
+		index=0;
+		for(SNode node : uni.a) {
+			System.out.println(index+"\t"+node.parent+"\t"+node.rank+"\t"+uni.getRoot(index));
+			index++;
+		}
+		
+		System.out.println();
+		System.out.println("**union(5,14) 수행후**");
+		uni.union(5, 14);
+		System.out.println("i  | Parent | rank | root");
+		index=0;
+		for(SNode node : uni.a) {
+			System.out.println(index+"\t"+node.parent+"\t"+node.rank+"\t"+uni.getRoot(index));
+			index++;
+		}
+		
+	}
+
+}
+[콘솔창 결과]
+**12회의 Union 연산 수행후**
+i  | Parent | rank | root 
+0	0	1	0
+1	0	0	0
+2	4	0	6
+3	3	1	3
+4	6	1	6
+5	3	0	3
+6	6	2	6
+7	3	0	3
+8	6	0	6
+9	3	0	3
+10	6	0	6
+11	3	0	3
+12	4	0	6
+13	3	0	3
+14	0	0	0
+
+**union(2,9) 수행후**
+[경로압축발생] (노드)2의 (부모노드)4를 6으로 갱신
+i  | Parent | rank | root
+0	0	1	0
+1	0	0	0
+2	6	0	6
+3	6	1	6
+4	6	1	6
+5	3	0	6
+6	6	2	6
+7	3	0	6
+8	6	0	6
+9	3	0	6
+10	6	0	6
+11	3	0	6
+12	4	0	6
+13	3	0	6
+14	0	0	0
+
+**union(5,14) 수행후**
+i  | Parent | rank | root
+0	6	1	6
+1	0	0	6
+2	6	0	6
+3	6	1	6
+4	6	1	6
+5	6	0	6
+6	6	2	6
+7	3	0	6
+8	6	0	6
+9	3	0	6
+10	6	0	6
+11	3	0	6
+12	4	0	6
+13	3	0	6
+14	0	0	6
